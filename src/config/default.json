@@ -1,0 +1,7 @@
+{
+  "hyperion": {
+    "address": "192.168.x.x",
+    "port": 19444,
+    "priority": 1
+  }
+}

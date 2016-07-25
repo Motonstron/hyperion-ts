@@ -1,0 +1,20 @@
+// tslint.json
+{
+  "extends": "tslint-config-typings",
+  "rules": {
+    "quotemark": [
+      true,
+      "double",
+      "avoid-escape"
+    ],
+    "no-console": [
+      true,
+      "debug",
+      "info",
+      "time",
+      "timeEnd",
+      "trace"
+    ],
+    "no-string-literal": false
+  }
+}

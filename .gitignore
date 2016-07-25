@@ -1,0 +1,17 @@
+node_modules
+bower_components
+npm-debug.log
+dist/
+.DS_Store
+.node-version
+coverage
+tmp
+*.sublime-*
+.tscache
+.gulp-tsc*
+report.tap
+run
+run_docker
+gulp-tsc-tmp*
+.env
+typings/
