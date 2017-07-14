@@ -1,13 +1,15 @@
 {
     "compileOnSave": true,
     "compilerOptions": {
-        "target": "es5",
+        "target": "es6",
         "outDir": "dist",
-        "module": "commonjs"
+        "noImplicitAny": true,
+        "alwaysStrict": true,
+        "removeComments": true,
+        "module": "commonjs",
+        "sourceMap": true
     },
     "exclude": [
-        "bower_components",
-        "node_modules",
-        "./src/typings"
+        "node_modules"
     ]
 }

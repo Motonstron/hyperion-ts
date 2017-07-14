@@ -2,21 +2,20 @@
   "name": "hyperion-ts",
   "version": "0.0.0",
   "description": "Hyperion Client - Typescript",
-  "main": "src/hyperion.ts",
+  "main": "dist/server.js",
   "dependencies": {
-    "config": "^1.21.0"
+    "config": "1.26.1",
+    "hapi": "^16.4.3"
   },
   "devDependencies": {
-    "del": "^2.2.0",
-    "gulp": "^3.9.1",
-    "gulp-typescript": "^2.13.6",
-    "require-dir": "^0.3.0",
-    "run-sequence": "^1.2.1",
-    "tslint": "^3.10.2",
-    "tslint-config-typings": "^0.2.3",
-    "typescript": "^1.8.10"
+    "@types/hapi": "^16.1.6",
+    "@types/node": "^8.0.10",
+    "tslint": "5.5.0",
+    "typedoc": "^0.7.1",
+    "typescript": "2.4.1"
   },
   "scripts": {
+    "build": "node_modules/.bin/tsc",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
