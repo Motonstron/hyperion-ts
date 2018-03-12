@@ -1,25 +1,63 @@
 import * as events from "events";
 import * as net from "net";
 
-export class Hyperion extends events.EventEmitter {
+export enum CommandType {
+  Info = "serverinfo",
+  Clear = "clearall",
+  Color = "color",
+  Effect = "effect",
+}
+
+export interface HyperionConfig {
+  address: string;
+  port: number;
+  priority: number;
+}
+
+export interface HyperionCommand {
+  command: string;
+  priority?: number;
+  effect?: HyperionEffect;
+  color?: number[];
+}
+
+export interface HyperionEffect {
+  name: string;
+  args: any;
+}
+
+export class HyperionCore extends events.EventEmitter {
 
   private socket: net.Socket;
+
   private isConnected: boolean;
+
   private dataBuffer: string = "";
 
-  constructor(public address: string, public port: number, public priority: number) {
+  private priority: number;
+
+  constructor(public config: HyperionConfig) {
     super();
+    this.priority = Number(this.config.priority) || 1000;
   }
 
   /**
    * Creates a new socket connection for the given address
    * in the config. Once connected emits a 'connect' event.
    */
-  public connect(): void {
+  public async connect(): Promise<any> {
     this.socket = new net.Socket();
-    this.socket.connect(this.port, this.address, () => {
-      this.isConnected = true;
-      this.emit("connect");
+    this.socket.setEncoding("utf8");
+    this.socket.connect(this.config.port, this.config.address);
+
+    return new Promise((resolve: () => void, reject: (err: Error) => void) => {
+      this.socket.on("connect", () => {
+        this.isConnected = true;
+        resolve();
+      });
+      this.socket.on("error", (err: Error) => {
+        reject(err);
+      });
     });
   }
 
@@ -28,11 +66,11 @@ export class Hyperion extends events.EventEmitter {
    *
    * @param color The color the lights should be set to.
    */
-  public setColour(color: number[]): Promise<string> {
+  public initialiseColour(color: number[]): Promise<string> {
     const message: HyperionCommand = {
       color,
-      command: "color",
-      priority: this.priority,
+      command: CommandType.Color,
+      priority: this.priority
     };
 
     return this.sendMessage(message);
@@ -45,14 +83,14 @@ export class Hyperion extends events.EventEmitter {
    * @param name The name of the effect
    * @param args The arguments for the effect.
    */
-  public setEffect(name: string, args?: any): Promise<string> {
+  public initialiseEffect(name: string, args?: any): Promise<string> {
     const message: HyperionCommand = {
-      command: "effect",
+      command: CommandType.Effect,
       effect: {
         args,
         name,
       },
-      priority: this.priority,
+      priority: this.priority
     };
 
     return this.sendMessage(message);
@@ -61,9 +99,9 @@ export class Hyperion extends events.EventEmitter {
   /**
    * Returns the information for the server.
    */
-  public getServerInfo(): Promise<string> {
+  public async getServerInfo(): Promise<string> {
     const message: HyperionCommand = {
-      command: "serverinfo",
+      command: CommandType.Info,
     };
 
     return this.sendMessage(message);
@@ -72,9 +110,9 @@ export class Hyperion extends events.EventEmitter {
   /**
    * Clears the current effect/color.
    */
-  public clear(): Promise<string> {
+  public async clear(): Promise<string> {
     const message: HyperionCommand = {
-      command: "clearall",
+      command: CommandType.Clear,
     };
 
     return this.sendMessage(message);
@@ -83,7 +121,7 @@ export class Hyperion extends events.EventEmitter {
   /**
    * Returns if the socket is connected.
    */
-  public get connected(): boolean {
+  public get getIsConnected(): boolean {
     return this.isConnected;
   }
 
@@ -101,24 +139,20 @@ export class Hyperion extends events.EventEmitter {
    * @param data
    */
   private parseData(data: string): Promise<string> {
-
     this.dataBuffer += data;
-
     return new Promise<string>((resolve: any, reject: any) => {
       if (this.dataBuffer.indexOf("\n") > -1) {
-
         this.dataBuffer.split("\n").forEach((response: string, i: number) => {
-
-          let parsedResponse: string;
-
           if (response.length === 0) {
             resolve("");
+            return;
           }
 
+          let parsedResponse: string;
           try {
             parsedResponse = JSON.parse(response);
           } catch (err) {
-            reject("Error parsing data");
+            // console.error("Error", err);
           }
 
           resolve(parsedResponse);
@@ -131,6 +165,7 @@ export class Hyperion extends events.EventEmitter {
    * Cleans up the listeners from the socket connection.
    */
   private cleanUp(): void {
+    this.dataBuffer = "";
     this.socket.removeAllListeners();
   }
 
@@ -141,22 +176,17 @@ export class Hyperion extends events.EventEmitter {
    * @param message
    */
   private sendMessage(message: HyperionCommand): Promise<string> {
-
     return new Promise<string>((resolve: any, reject: any) => {
-
-      this.socket.once("data", (data: any) => {
-        this.cleanUp();
+      this.socket.on("data", (data: any) => {
         this.parseData(data).then((value: string) => {
           resolve(value);
-        }).catch((err: any) => {
-          reject(err);
+          this.cleanUp();
         });
       });
-      this.socket.once("error", (err: any) => {
+      this.socket.on("error", (err: Error) => {
+        reject("Error: Something went wrong...", err);
         this.cleanUp();
-        reject("Error: Something went wrong...");
       });
-      this.socket.on("end", () => this.cleanUp());
       this.socket.write(JSON.stringify(message) + "\n");
     });
 

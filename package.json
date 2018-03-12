@@ -3,20 +3,35 @@
   "version": "0.0.0",
   "description": "Hyperion Client - Typescript",
   "main": "dist/server.js",
+  "types": "./src/main/hyperion-ts.d.ts",
+  "repository": {
+    "type": "git",
+    "url": ""
+  },
   "dependencies": {
-    "config": "1.26.1",
-    "hapi": "^16.4.3"
+    "config": "^1.29.2",
+    "hapi": "^16.5.2"
   },
   "devDependencies": {
-    "@types/hapi": "^16.1.6",
-    "@types/node": "^8.0.10",
-    "tslint": "5.5.0",
+    "@types/chai": "^4.0.1",
+    "@types/config": "0.0.33",
+    "@types/hapi": "^16.1.8",
+    "@types/joi": "^10.4.3",
+    "@types/mocha": "^2.2.47",
+    "@types/node": "^6.0.85",
+    "@types/sinon": "^2.3.7",
+    "chai": "^4.1.0",
+    "joi": "^11.1.1",
+    "mocha": "^3.5.3",
+    "mocha-typescript": "^1.1.7",
+    "sinon": "^2.4.1",
+    "tslint": "^5.5.0",
     "typedoc": "^0.7.1",
-    "typescript": "2.4.1"
+    "typescript": "^2.4.1"
   },
   "scripts": {
-    "build": "node_modules/.bin/tsc",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "prepare": "rm -rf dist && tsc",
+    "test": "mocha --reporter spec dist/test/**/*.js"
   },
   "author": "",
   "license": "ISC"

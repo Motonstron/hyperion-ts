@@ -1,0 +1,15 @@
+version: '3'
+services:
+  hyperion-ts:
+    image: hyperion-ts
+    build: .
+    ports:
+      - 8080:8080
+      - 9229:9229
+    environment:
+      - NODE_CONFIG_DIR=/usr/app/dist/config
+      - SERVER_PORT=8080
+      - HYPERION_ADDRESS=192.168.1.107
+      - HYPERION_PORT=19444
+      - HYPERION_PRIORITY=1000
+    command: node --inspect dist/hyperion-server.js
