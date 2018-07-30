@@ -1,0 +1,11 @@
+{
+  "watch": [
+    "./src"
+  ],
+  "ext": "ts",
+  "ignore": [
+    "./src/**/*.spec.ts"
+  ],
+  "verbose": true,
+  "exec": "npm run build && node ."
+}

@@ -1,6 +1,6 @@
 import * as Config from "config";
 import * as Hapi from "hapi";
-import * as Joi from "joi";
+// import * as Joi from "joi";
 import { HyperionConfig, HyperionCore } from "./hyperion-core";
 
 export class HyperionServer {
@@ -11,11 +11,12 @@ export class HyperionServer {
 
   private hyperion = new HyperionCore(this.hyperionConfig);
 
+  private isActive = false;
+
   constructor() {
     this.server.connection({
-      port: Config.get("server.port") as string,
+      port: Config.get("server.port") as number,
     });
-    this.initialiseRoots();
   }
 
   public connect(): void {
@@ -27,6 +28,7 @@ export class HyperionServer {
       try {
         await this.hyperion.connect();
         console.info(`[Hyperion]: Connection Successful ${this.server.info.address}:${this.server.info.port}`);
+        this.initialiseRoots();
       } catch (err) {
         throw Error(`[Hyperion Server]: Unable to connect to Hyperion. ${err}`);
       }
@@ -49,7 +51,7 @@ export class HyperionServer {
             result: data,
           });
         }).catch((err: Error) => {
-          throw Error(`Hyperion off error: ${err}`);
+          throw Error(`Hyperion info error: ${err}`);
         });
       },
       method: "GET",
@@ -63,6 +65,7 @@ export class HyperionServer {
           reply({
             result: data
           });
+          this.isActive = true;
         } catch (err) {
           throw Error(`Hyperion on error: ${err}`);
 
@@ -75,12 +78,13 @@ export class HyperionServer {
     this.server.route({
       handler: async (request: Hapi.Request, reply: Hapi.ReplyNoContinue) => {
         try {
-          const data = await this.hyperion.initialiseColour([0, 255, 255]);
+          const data = await this.hyperion.initialiseColour([0, 0, 0]);
           reply({
             result: data,
           });
+          this.isActive = false;
         } catch (err) {
-          throw Error(`Hyperion info error: ${err}`);
+          throw Error(`Hyperion off error: ${err}`);
         }
       },
       method: "GET",
@@ -88,33 +92,15 @@ export class HyperionServer {
     });
 
     this.server.route({
-      config: {
-        handler: (request: Hapi.Request, reply: Hapi.ReplyNoContinue) => {
-
-          const colour = [
-            request.payload.red,
-            request.payload.green,
-            request.payload.blue
-          ];
-
-          this.hyperion.initialiseColour(colour).then((data: string) => {
-            reply({
-              result: data,
-            });
-          }).catch((err: Error) => {
-            console.error("=====", err);
-          });
-        },
-        validate: {
-          payload: {
-            blue: Joi.number().min(0).max(255).required(),
-            green: Joi.number().min(0).max(255).required(),
-            red: Joi.number().min(0).max(255).required()
-          },
-        },
+      handler: async (request: Hapi.Request, reply: Hapi.ReplyNoContinue) => {
+        try {
+          reply(Number(this.isActive));
+        } catch (err) {
+          throw Error(`Hyperion status error: ${err}`);
+        }
       },
-      method: "POST",
-      path: "/hyperion-colour",
+      method: "GET",
+      path: Config.get("hyperion.routes.status") as string,
     });
   }
 }

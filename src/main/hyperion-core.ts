@@ -38,7 +38,7 @@ export class HyperionCore extends events.EventEmitter {
 
   constructor(public config: HyperionConfig) {
     super();
-    this.priority = Number(this.config.priority) || 1000;
+    this.priority = Number(this.config.priority) || 1;
   }
 
   /**
@@ -59,6 +59,7 @@ export class HyperionCore extends events.EventEmitter {
         reject(err);
       });
     });
+
   }
 
   /**
@@ -67,13 +68,11 @@ export class HyperionCore extends events.EventEmitter {
    * @param color The color the lights should be set to.
    */
   public initialiseColour(color: number[]): Promise<string> {
-    const message: HyperionCommand = {
+    return this.sendMessage({
       color,
       command: CommandType.Color,
       priority: this.priority
-    };
-
-    return this.sendMessage(message);
+    });
   }
 
   /**
@@ -84,38 +83,32 @@ export class HyperionCore extends events.EventEmitter {
    * @param args The arguments for the effect.
    */
   public initialiseEffect(name: string, args?: any): Promise<string> {
-    const message: HyperionCommand = {
+    return this.sendMessage({
       command: CommandType.Effect,
       effect: {
         args,
         name,
       },
       priority: this.priority
-    };
-
-    return this.sendMessage(message);
+    });
   }
 
   /**
    * Returns the information for the server.
    */
   public async getServerInfo(): Promise<string> {
-    const message: HyperionCommand = {
+    return this.sendMessage({
       command: CommandType.Info,
-    };
-
-    return this.sendMessage(message);
+    });
   }
 
   /**
    * Clears the current effect/color.
    */
   public async clear(): Promise<string> {
-    const message: HyperionCommand = {
+    return this.sendMessage({
       command: CommandType.Clear,
-    };
-
-    return this.sendMessage(message);
+    });
   }
 
   /**
@@ -145,7 +138,6 @@ export class HyperionCore extends events.EventEmitter {
         this.dataBuffer.split("\n").forEach((response: string, i: number) => {
           if (response.length === 0) {
             resolve("");
-            return;
           }
 
           let parsedResponse: string;

@@ -2,7 +2,7 @@
   "name": "hyperion-ts",
   "version": "0.0.0",
   "description": "Hyperion Client - Typescript",
-  "main": "dist/server.js",
+  "main": "./dist/main/hyperion-server.js",
   "types": "./src/main/hyperion-ts.d.ts",
   "repository": {
     "type": "git",
@@ -24,13 +24,15 @@
     "joi": "^11.1.1",
     "mocha": "^3.5.3",
     "mocha-typescript": "^1.1.7",
+    "nodemon": "^1.17.5",
     "sinon": "^2.4.1",
     "tslint": "^5.5.0",
     "typedoc": "^0.7.1",
     "typescript": "^2.4.1"
   },
   "scripts": {
-    "prepare": "rm -rf dist && tsc",
+    "build": "tsc",
+    "prepare": "rm -rf dist && npm run build",
     "test": "mocha --reporter spec dist/test/**/*.js"
   },
   "author": "",

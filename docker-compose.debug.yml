@@ -5,11 +5,12 @@ services:
     build: .
     ports:
       - 8080:8080
-      - 9229:9229
     environment:
-      - NODE_CONFIG_DIR=/usr/app/dist/config
+      - NODE_CONFIG_DIR=./dist/main/config
       - SERVER_PORT=8080
-      - HYPERION_ADDRESS=192.168.1.107
+      - HYPERION_ADDRESS=192.168.86.110
       - HYPERION_PORT=19444
-      - HYPERION_PRIORITY=1000
-    command: node --inspect dist/hyperion-server.js
+      - HYPERION_PRIORITY=1
+    volumes:
+      - ./src/:/usr/app/src/
+    command: ./node_modules/.bin/nodemon .
